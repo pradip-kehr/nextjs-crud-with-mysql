@@ -1,9 +1,9 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { PostFormValidationSchema } from "@/validationShema";
 import { revalidatePath } from "next/cache";//161
-import * as yup from "yup"
+// import { PostFormValidationSchema } from "@/validationShema";
+// import * as yup from "yup"
 export const updateOrCreatePost = async (data: Omit<Post, 'id'>, id: number) => {
     // const schema = yup.object({
     //     name: yup.string().required(),

@@ -22,6 +22,7 @@ const PostForm = ({ post }: Props) => {
             setInitialValues(post);
         }
     }, [post]);
+
     const onSubmitHandler = (values: Omit<Post, 'id'>) => {
         updateOrCreatePost(values, (post?.id || 0)).then((response) => {
             if (response.success) {
