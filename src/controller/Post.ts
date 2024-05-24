@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { revalidatePath } from "next/cache";//161
+import { revalidatePath, revalidateTag } from "next/cache";//161
 // import { PostFormValidationSchema } from "@/validationShema";
 // import * as yup from "yup"
 import excelJS from "exceljs"
@@ -35,7 +35,9 @@ export const updateOrCreatePost = async (data: Omit<Post, 'id' | 'user_id'>, id:
             user_id: 1
         }
     }).then(() => {
-        revalidatePath(`edit/${id}`);
+        revalidateTag("fetchPostData");
+        revalidateTag("editPost");
+        // revalidatePath(`edit/${id}`);
         return {
             success: true,
             message: `Post ${id ? 'updated' : 'created'} successfully.`
@@ -54,7 +56,8 @@ export const deletePost = async (id: number) => {
             id: id
         }
     }).then(() => {
-        revalidatePath('/');
+        revalidateTag("fetchPostData");
+        // revalidatePath('/');
         return {
             success: true,
             message: "Post deleted successfully"

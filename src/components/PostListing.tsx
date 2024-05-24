@@ -10,9 +10,7 @@ const PostListing = () => {
     }, []);
     const fetchPosts = async () => {
         const postsResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/post`, {
-            next: {
-                revalidate: 0
-            }
+            cache: 'no-store',
         });
         const posts = await postsResponse.json();
         console.log(posts, 'pkk');

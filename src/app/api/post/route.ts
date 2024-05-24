@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
+
   const data = await prisma.post.findMany({
     orderBy: {
       created_at: 'desc'
@@ -14,3 +15,4 @@ export async function GET(request: NextRequest) {
     status: 200
   });
 }
+export const dynamic = "force-dynamic";
