@@ -4,7 +4,8 @@ import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";//161
 // import { PostFormValidationSchema } from "@/validationShema";
 // import * as yup from "yup"
-export const updateOrCreatePost = async (data: Omit<Post, 'id'>, id: number) => {
+import excelJS from "exceljs"
+export const updateOrCreatePost = async (data: Omit<Post, 'id' | 'user_id'>, id: number) => {
     // const schema = yup.object({
     //     name: yup.string().required(),
     //     age: yup.number().required().positive().integer(),
@@ -31,6 +32,7 @@ export const updateOrCreatePost = async (data: Omit<Post, 'id'>, id: number) => 
         },
         create: {
             ...data,
+            user_id: 1
         }
     }).then(() => {
         revalidatePath(`edit/${id}`);
@@ -63,4 +65,40 @@ export const deletePost = async (id: number) => {
             message: "Post deleted successfully"
         }
     });
+}
+
+export const exportPosts = async () => {
+    const workbook = new excelJS.Workbook();
+
+    const workSheet = workbook.addWorksheet("post");
+
+    workSheet.views = [
+        { state: 'frozen', ySplit: 1, }
+    ]
+    workSheet.columns = [
+        { header: 'Title', key: 'title', width: 20 },
+        { header: 'Description', key: 'body', width: 20 }
+    ]
+    workSheet.addRows([
+        { title: 'JI', body: 'by' }
+    ]);
+    workSheet.getRow(1).eachCell((cell) => {
+        cell.font = { bold: true, color: { argb: 'ffffff' }, size: 15, };
+        cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: '0000' }, // Yellow background
+        };
+        cell.alignment = { vertical: 'middle', horizontal: 'center' }
+    });
+    try {
+        const data = await workbook.xlsx.writeBuffer();
+        // const data = await workbook.xlsx.writeFile("post.xlsx").then(() => {
+
+        // });
+        return data;
+    } catch (error) {
+        console.log(error);
+
+    }
 }

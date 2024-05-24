@@ -12,7 +12,7 @@ type Props = {
 }
 
 const PostForm = ({ post }: Props) => {
-    const [initialValues, setInitialValues] = useState<Omit<Post, 'id'>>({
+    const [initialValues, setInitialValues] = useState<Omit<Post, 'id' | 'user_id'>>({
         title: '',
         body: ''
     });
@@ -23,7 +23,7 @@ const PostForm = ({ post }: Props) => {
         }
     }, [post]);
 
-    const onSubmitHandler = (values: Omit<Post, 'id'>) => {
+    const onSubmitHandler = (values: Omit<Post, 'id' | 'user_id'>) => {
         updateOrCreatePost(values, (post?.id || 0)).then((response) => {
             if (response.success) {
                 toast.success(response?.message);

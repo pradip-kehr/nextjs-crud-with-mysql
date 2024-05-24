@@ -15,6 +15,8 @@ const PostListing = () => {
             }
         });
         const posts = await postsResponse.json();
+        console.log(posts, 'pkk');
+
         if (posts?.data) {
             setPosts(posts?.data);
         }
