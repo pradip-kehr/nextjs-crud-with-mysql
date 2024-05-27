@@ -12,7 +12,7 @@ const ExportButton = (props: Props) => {
 
     }
     return (
-        <Link target='_blank' href="/api/post/export" /* onClick={exportPostsHandler} */ className="bg-blue-600 hover:bg-blue-800 py-1 mr-2 text-white rounded-md px-4">Hello</Link>
+        <Link target='_blank' href="/api/post/export" /* onClick={exportPostsHandler} */ className="bg-blue-600 hover:bg-blue-800 py-3 mr-2 text-white rounded-md px-4">Export</Link>
     )
 }
 

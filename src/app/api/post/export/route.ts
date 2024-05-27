@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import excelJS from "exceljs"
+import prisma from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
     const workbook = new excelJS.Workbook();
@@ -10,12 +11,18 @@ export async function GET(request: NextRequest) {
         { state: 'frozen', ySplit: 1, }
     ]
     workSheet.columns = [
+        { header: 'Id', key: 'id', width: 20 },
         { header: 'Title', key: 'title', width: 20 },
         { header: 'Description', key: 'body', width: 20 }
     ]
-    workSheet.addRows([
-        { title: 'JI', body: 'by' }
-    ]);
+    const post = (await prisma.post.findMany({})).map((value) => {
+        return {
+            id: value?.id,
+            title: value?.title,
+            body: value?.body
+        }
+    });
+    workSheet.addRows(post);
     workSheet.getRow(1).eachCell((cell) => {
         cell.font = { bold: true, color: { argb: 'ffffff' }, size: 15, };
         cell.fill = {

@@ -79,9 +79,11 @@ export const exportPosts = async () => {
         { state: 'frozen', ySplit: 1, }
     ]
     workSheet.columns = [
+        { header: 'Id', key: 'id', width: 20 },
         { header: 'Title', key: 'title', width: 20 },
         { header: 'Description', key: 'body', width: 20 }
     ]
+
     workSheet.addRows([
         { title: 'JI', body: 'by' }
     ]);
