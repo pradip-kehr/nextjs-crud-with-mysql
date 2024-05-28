@@ -27,8 +27,8 @@ export default function RootLayout({
       <body className={inter.className} /* onContextMenuCapture={() => false} */ >
         <ToastContainer />
         {children}
-        <Link href={'/other/login'}>Login link</Link><br />
-        <Link href={'/login2'}>Login link2</Link><br />
+        {/* <Link href={'/other/login'}>Login link</Link><br />
+        <Link href={'/login2'}>Login link2</Link><br /> */}
         {auth2}
         {auth}
       </body>

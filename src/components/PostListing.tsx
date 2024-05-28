@@ -13,8 +13,6 @@ const PostListing = () => {
             cache: 'no-store',
         });
         const posts = await postsResponse.json();
-        console.log(posts, 'pkk');
-
         if (posts?.data) {
             setPosts(posts?.data);
         }

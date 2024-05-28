@@ -5,6 +5,7 @@ import { revalidatePath, revalidateTag } from "next/cache";//161
 // import { PostFormValidationSchema } from "@/validationShema";
 // import * as yup from "yup"
 import excelJS from "exceljs"
+import { sampleQueue } from "@/redis/workers/sample";
 export const updateOrCreatePost = async (data: Omit<Post, 'id' | 'user_id'>, id: number) => {
     // const schema = yup.object({
     //     name: yup.string().required(),
@@ -106,4 +107,53 @@ export const exportPosts = async () => {
         console.log(error);
 
     }
+}
+
+export const importPosts = async (formData: FormData) => {
+
+    try {
+        const file = formData.get("file") as File;
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = new Uint8Array(arrayBuffer);
+        // await fs.mkdir('./public/upload', { recursive: true });
+        // await fs.writeFile(`./public/upload/${new Date().getTime()}.xlsx`, buffer);
+
+        const workbook = new excelJS.Workbook();
+        const result = await workbook.xlsx.load(buffer);
+        let data: Omit<Post, 'id'>[] = [];
+        result.eachSheet((sheet, id) => {
+            sheet.eachRow((row, rowIndex) => {
+                if (rowIndex == 1) return;
+                data = [...data, {
+                    title: `${row.getCell('A').value}`,
+                    body: `${row.getCell('B').value}`,
+                    user_id: 1
+                }]
+            })
+        });
+        await prisma.post.createMany({
+            data,
+            skipDuplicates: true,
+        });
+        revalidatePath('/');
+        return {
+            success: true,
+            message: "Posts imported successfully."
+        }
+    } catch (error) {
+        return {
+            success: false,
+            message: "Posts failed import please try again later."
+        }
+    }
+}
+
+export const addQueue = async () => {
+    const data = {
+        // any serializable data you want to provide for the job
+        // for this example, we'll provide a message
+        message: 'This is a sample job'
+    }
+    const response = await sampleQueue.add('someJob', data);
+    console.log(response, 'data')
 }
