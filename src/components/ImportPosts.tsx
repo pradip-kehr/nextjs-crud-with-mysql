@@ -1,14 +1,17 @@
 "use client"
-import { ErrorMessage, Field, Form, Formik } from 'formik'
+import { ErrorMessage, Field, Form, Formik, FormikHelpers } from 'formik'
 import React from 'react'
 import InputFile from './component/input-file'
-import { addQueue, importPosts } from '@/controller/Post'
+import { addQueue, importPostUsingQueue, importPosts } from '@/controller/Post'
 import { toast } from 'react-toastify'
 import * as yup from "yup"
+import { useRouter } from 'next/navigation'
+import { sendEmail } from '@/controller/emailsender'
 
 type Props = {}
 
 const ImportPosts = (props: Props) => {
+    const router = useRouter();
     const supportedFileTypes = ['application/vnd.ms-excel', 'text/csv', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
     const validations = yup.object({
         file: yup.mixed()
@@ -19,13 +22,15 @@ const ImportPosts = (props: Props) => {
             })
             .required('please select file to import.')
     });
-    const importFile = (values: { file: File | '' }) => {
+    const importFile = (values: { file: File | '' }, action: FormikHelpers<{ file: File | '' }>) => {
         if (values.file) {
             const data = new FormData();
             data.append('file', values!.file);
-            importPosts(data).then((response) => {
+            importPostUsingQueue(data).then((response) => {
                 if (response?.success) {
-                    toast.success(response.message)
+                    toast.success(response.message);
+                    action.resetForm({})
+                    router.push('/');
                 } else {
                     toast.error(response.message)
                 }
@@ -38,8 +43,6 @@ const ImportPosts = (props: Props) => {
         <div className='mt-5'>
             <Formik initialValues={{ file: '' }} validationSchema={validations} onSubmit={importFile}>
                 {({ setFieldValue, errors, values }) => {
-                    console.log(errors, values);
-
                     return (
                         <Form>
                             <div className="flex flex-col items-start mx-auto p-6 rounded-lg shadow-lg">
@@ -79,7 +82,7 @@ const ImportPosts = (props: Props) => {
                                 </div>
                                 <ErrorMessage name='file' component={'div'} className='text-red-500' />
                                 <button type="button" onClick={() => {
-                                    addQueue();
+                                    sendEmail();
                                 }}>start</button>
                             </div>
                         </Form>

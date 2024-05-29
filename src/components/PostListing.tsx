@@ -45,7 +45,7 @@ const PostListing = () => {
                                         {value.body}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <PostActions id={value.id} />
+                                        <PostActions id={value.id} fetchPosts={() => { fetchPosts() }} />
                                     </td>
                                 </tr>
                             )

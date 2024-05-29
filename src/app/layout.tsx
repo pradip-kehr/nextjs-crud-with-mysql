@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-
 import { ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
-import Link from "next/link";
-
 const inter = Inter({ subsets: ["vietnamese"] });
 
 export const metadata: Metadata = {

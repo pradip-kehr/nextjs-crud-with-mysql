@@ -7,9 +7,10 @@ import Swal from 'sweetalert2';
 
 type Props = {
     id: number;
+    fetchPosts: () => void
 }
 
-const PostActions = ({ id }: Props) => {
+const PostActions = ({ id, fetchPosts }: Props) => {
     const deletePostHandler = () => {
         Swal.fire({
             title: "Do you want to delete this post?",
@@ -22,6 +23,7 @@ const PostActions = ({ id }: Props) => {
                 deletePost(id).then((response) => {
                     if (response?.success) {
                         toast.success(response?.message);
+                        // fetchPosts()
                     } else {
                         toast.error(response?.message);
                     }
