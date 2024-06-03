@@ -5,6 +5,9 @@ import { revalidatePath, revalidateTag } from "next/cache";//161
 // import { PostFormValidationSchema } from "@/validationShema";
 // import * as yup from "yup"
 import excelJS from "exceljs"
+import { sampleQueue } from "@/redis/workers/sample";
+import { importPostQueue } from "@/redis/workers/importPosts";
+import fs from "fs";
 export const updateOrCreatePost = async (data: Omit<Post, 'id' | 'user_id'>, id: number) => {
     // const schema = yup.object({
     //     name: yup.string().required(),
@@ -56,8 +59,7 @@ export const deletePost = async (id: number) => {
             id: id
         }
     }).then(() => {
-        revalidateTag("fetchPostData");
-        // revalidatePath('/');
+        revalidatePath('/');
         return {
             success: true,
             message: "Post deleted successfully"
@@ -65,16 +67,14 @@ export const deletePost = async (id: number) => {
     }).catch(() => {
         return {
             success: false,
-            message: "Post deleted successfully"
+            message: "Post fail to delete."
         }
     });
 }
 
 export const exportPosts = async () => {
     const workbook = new excelJS.Workbook();
-
     const workSheet = workbook.addWorksheet("post");
-
     workSheet.views = [
         { state: 'frozen', ySplit: 1, }
     ]
@@ -104,6 +104,89 @@ export const exportPosts = async () => {
         return data;
     } catch (error) {
         console.log(error);
-
     }
+}
+
+export const importPosts = async (formData: FormData) => {
+    try {
+        const file = formData.get("file") as File;
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = new Uint8Array(arrayBuffer);
+        const fileName = `${new Date().getTime()}.xlsx`
+        await fs.mkdir('./public/upload', (data) => {
+            console.log(data, 'mkdir');
+
+        });
+        await fs.writeFile(`./public/upload/${fileName}`, buffer, (data) => {
+            console.log(data, 'writefile');
+        });
+
+        const workbook = new excelJS.Workbook();
+        const result = await workbook.xlsx.load(buffer);
+        let data: Omit<Post, 'id'>[] = [];
+        result.eachSheet((sheet, id) => {
+            sheet.eachRow((row, rowIndex) => {
+                if (rowIndex == 1) return;
+                data = [...data, {
+                    title: `${row.getCell('A').value}`,
+                    body: `${row.getCell('B').value}`,
+                    user_id: 1
+                }]
+            })
+        });
+        await prisma.post.createMany({
+            data,
+            skipDuplicates: true,
+        });
+        revalidatePath('/');
+        return {
+            success: true,
+            message: "Posts imported successfully."
+        }
+    } catch (error) {
+        return {
+            success: false,
+            message: "Posts failed import please try again later."
+        }
+    }
+}
+
+export const importPostUsingQueue = async (formData: FormData) => {
+    try {
+        const file = formData.get("file") as File;
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = new Uint8Array(arrayBuffer);
+        const fileName = `${new Date().getTime()}.xlsx`
+        await fs.mkdir('./public/upload', (data) => {
+            console.log(data, 'mkdir');
+
+        });
+        await fs.writeFile(`./src/assets/posts/${fileName}`, buffer, (data) => {
+            console.log(data, 'writefile');
+        });
+        const response = await importPostQueue.add(`${new Date().getTime()}`, { importFileName: fileName, toEmail: formData.get('toEmail') });
+        return {
+            success: true,
+            message: "File uploaded successfully. will send you mail after the upload completes."
+        }
+    } catch (error) {
+        return {
+            success: false,
+            message: "Failed upload File. please try again later."
+        }
+    }
+
+
+}
+
+
+export const addQueue = async () => {
+    const data = {
+        // any serializable data you want to provide for the job
+        // for this example, we'll provide a message
+        message: 'This is a sample job'
+    }
+    const response = await sampleQueue.add('someJob', data);
+    console.log(response, 'data')
+
 }

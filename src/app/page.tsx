@@ -11,7 +11,8 @@ export default async function Home() {
           Posts
         </span>
         <div>
-          <ExportButton />
+          <Link target='_blank' href="/api/post/export" className="bg-slate-600 hover:bg-slate-800 py-3 mr-2 text-white rounded-md px-4">Export</Link>
+          <Link href={'/import'} className="bg-green-600 hover:bg-green-800 py-3 text-white rounded-md px-4 mr-2">Import</Link>
           <Link href={'/add'} className="bg-blue-600 hover:bg-blue-800 py-3 text-white rounded-md px-4">Add</Link>
         </div>
       </div>
