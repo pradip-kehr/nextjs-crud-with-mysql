@@ -3,7 +3,6 @@ import { Job, Queue, Worker } from "bullmq";
 import { connection } from "../connection";
 import excelJS from "exceljs"
 import prisma from "@/lib/prisma";
-import { revalidatePath, revalidateTag } from "next/cache";
 import fs from "fs";
 import { sendEmail } from "@/controller/emailsender";
 export const importPostQueue = new Queue('importPosts', {

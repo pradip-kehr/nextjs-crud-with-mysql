@@ -157,7 +157,7 @@ export const importPostUsingQueue = async (formData: FormData) => {
         const arrayBuffer = await file.arrayBuffer();
         const buffer = new Uint8Array(arrayBuffer);
         const fileName = `${new Date().getTime()}.xlsx`
-        await fs.mkdir('./public/upload', (data) => {
+        await fs.mkdir('./src/assets/posts', (data) => {
             console.log(data, 'mkdir');
 
         });
