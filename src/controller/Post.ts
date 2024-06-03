@@ -164,7 +164,7 @@ export const importPostUsingQueue = async (formData: FormData) => {
         await fs.writeFile(`./src/assets/posts/${fileName}`, buffer, (data) => {
             console.log(data, 'writefile');
         });
-        const response = await importPostQueue.add(`${new Date().getTime()}`, { importFileName: fileName });
+        const response = await importPostQueue.add(`${new Date().getTime()}`, { importFileName: fileName, toEmail: formData.get('toEmail') });
         return {
             success: true,
             message: "File uploaded successfully. will send you mail after the upload completes."

@@ -6,7 +6,6 @@ import { addQueue, importPostUsingQueue, importPosts } from '@/controller/Post'
 import { toast } from 'react-toastify'
 import * as yup from "yup"
 import { useRouter } from 'next/navigation'
-import { sendEmail } from '@/controller/emailsender'
 
 type Props = {}
 
@@ -20,11 +19,15 @@ const ImportPosts = (props: Props) => {
                 const file = value as File;
                 return supportedFileTypes.includes(file?.type);
             })
-            .required('please select file to import.')
+            .required('please select file to import.'),
+        toEmail: yup.string().nullable().email("Please provide valid email address")
     });
-    const importFile = (values: { file: File | '' }, action: FormikHelpers<{ file: File | '' }>) => {
+    const importFile = (values: { file: File | '', toEmail?: string }, action: FormikHelpers<{ file: File | '', toEmail: string }>) => {
         if (values.file) {
+            console.log(values);
             const data = new FormData();
+            if (values?.toEmail)
+                data.append('toEmail', values?.toEmail);
             data.append('file', values!.file);
             importPostUsingQueue(data).then((response) => {
                 if (response?.success) {
@@ -41,8 +44,8 @@ const ImportPosts = (props: Props) => {
     }
     return (
         <div className='mt-5'>
-            <Formik initialValues={{ file: '' }} validationSchema={validations} onSubmit={importFile}>
-                {({ setFieldValue, errors, values }) => {
+            <Formik initialValues={{ file: '', toEmail: '' }} validationSchema={validations} onSubmit={importFile}>
+                {({ setFieldValue, }) => {
                     return (
                         <Form>
                             <div className="flex flex-col items-start mx-auto p-6 rounded-lg shadow-lg">
@@ -50,7 +53,11 @@ const ImportPosts = (props: Props) => {
                                     <h3 className="text-lg font-semibold">Upload a File</h3>
                                     <p className="text-gray-500 dark:text-gray-400">Select a file to upload. Supported formats: xlsx, csv.</p>
                                 </div>
-                                <div className="w-full flex items-center gap-2">
+                                <div className='mt-5 w-full'>
+                                    <label htmlFor="title">Please provide email address to notify after import competed.</label>
+                                    <Field id="toEmail" name="toEmail" placeholder="Email" className="px-2 block w-full h-9  border-slate-300 border focus:border-blue-600 rounded-md mt-2" />
+                                </div>
+                                <div className="w-full flex items-center gap-2 mt-5">
                                     <InputFile onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                         const files = e?.target?.files;
                                         if (files) {
@@ -81,9 +88,6 @@ const ImportPosts = (props: Props) => {
                                     </button>
                                 </div>
                                 <ErrorMessage name='file' component={'div'} className='text-red-500' />
-                                <button type="button" onClick={() => {
-                                    sendEmail();
-                                }}>start</button>
                             </div>
                         </Form>
                     )

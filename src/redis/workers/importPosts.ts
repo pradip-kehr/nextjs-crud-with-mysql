@@ -5,6 +5,7 @@ import excelJS from "exceljs"
 import prisma from "@/lib/prisma";
 import { revalidatePath, revalidateTag } from "next/cache";
 import fs from "fs";
+import { sendEmail } from "@/controller/emailsender";
 export const importPostQueue = new Queue('importPosts', {
     connection,
     defaultJobOptions: {
@@ -42,8 +43,17 @@ const worker = new Worker('importPosts', async (job: Job) => {
             skipDuplicates: true,
         });
     }
+    let errorFileName;
     if (errorData.length > 0) {
-        await generateErrorExcel(errorData);
+        errorFileName = await generateErrorExcel(errorData);
+    }
+    return {
+        fileName: requestData.importFileName,
+        totalRecords: data?.length + errorData?.length,
+        processedRecords: data?.length,
+        errorRecords: errorData?.length,
+        errorFileName: errorFileName,
+        toEmail: requestData?.toEmail || null
     }
 }, {
     connection,
@@ -54,6 +64,8 @@ const worker = new Worker('importPosts', async (job: Job) => {
 
 worker.on("completed", async (job) => {
     const requestData = job.data;
+    const processingInfo = job.returnvalue;
+    await sendEmail(processingInfo);
     await fs.rm(`./src/assets/posts/${requestData.importFileName}`, (error) => {
         console.log("remove file error", error);
     });
@@ -102,10 +114,11 @@ const generateErrorExcel = async (data: { title: string; body: string; error: st
     });
     try {
         // const data = await workbook.xlsx.writeBuffer();
-        const data = await workbook.xlsx.writeFile(`./src/assets/posts/ExcelErrorFiles/${new Date().getTime()}.xlsx`).then(() => {
+        const fileName = `${new Date().getTime()}.xlsx`
+        const data = await workbook.xlsx.writeFile(`./src/assets/posts/ExcelErrorFiles/${fileName}`).then(() => {
 
         });
-        return data;
+        return fileName;
     } catch (error) {
         console.log(error);
     }
