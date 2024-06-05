@@ -76,7 +76,7 @@ const ImportComplete = ({ totalRecords, errorRecords, newCreatedRecords, process
                                                                                                     </table>
                                                                                                     <h1 style={{ fontSize: "24px", fontWeight: "600", "margin": "0", textAlign: "center" }}>
                                                                                                         Your
-                                                                                                        import "{fileName}" is ready
+                                                                                                        import &quot;{fileName}&quot; is ready
                                                                                                     </h1>
                                                                                                     <table border={0} cellSpacing={0} width="100%" style={{ fontSize: "0", "height": "30px", "width": "100%", minWidth: "100%", lineHeight: "0" }}>
                                                                                                         <tbody>
