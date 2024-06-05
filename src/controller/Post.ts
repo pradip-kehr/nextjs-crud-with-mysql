@@ -7,7 +7,10 @@ import { revalidatePath, revalidateTag } from "next/cache";//161
 import excelJS from "exceljs"
 import { sampleQueue } from "@/redis/workers/sample";
 import { importPostQueue } from "@/redis/workers/importPosts";
-import fs from "fs";
+import fs, { createReadStream } from "fs";
+import { googleAuthorize, uploadToGoogleDrive } from "@/lib/utils";
+import { google } from "googleapis"
+import path from "path";
 export const updateOrCreatePost = async (data: Omit<Post, 'id' | 'user_id'>, id: number) => {
     // const schema = yup.object({
     //     name: yup.string().required(),
@@ -154,8 +157,10 @@ export const importPosts = async (formData: FormData) => {
 export const importPostUsingQueue = async (formData: FormData) => {
     try {
         const file = formData.get("file") as File;
+
         const arrayBuffer = await file.arrayBuffer();
         const buffer = new Uint8Array(arrayBuffer);
+        await uploadToGoogleDrive(file, file?.type);
         const fileName = `${new Date().getTime()}.xlsx`
         await fs.mkdir('./src/assets/posts', (data) => {
             console.log(data, 'mkdir');
@@ -170,13 +175,12 @@ export const importPostUsingQueue = async (formData: FormData) => {
             message: "File uploaded successfully. will send you mail after the upload completes."
         }
     } catch (error) {
+        console.log(error, '------------------')
         return {
             success: false,
             message: "Failed upload File. please try again later."
         }
     }
-
-
 }
 
 
@@ -190,3 +194,5 @@ export const addQueue = async () => {
     console.log(response, 'data')
 
 }
+
+
