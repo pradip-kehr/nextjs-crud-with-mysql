@@ -6,6 +6,7 @@ import { addQueue, importPostUsingQueue, importPosts } from '@/controller/Post'
 import { toast } from 'react-toastify'
 import * as yup from "yup"
 import { useRouter } from 'next/navigation'
+import { send } from '@/controller/emailsender'
 
 type Props = {}
 
@@ -89,6 +90,7 @@ const ImportPosts = (props: Props) => {
                                 </div>
                                 <ErrorMessage name='file' component={'div'} className='text-red-500' />
                             </div>
+                            <button onClick={() => send()}>Click</button>
                         </Form>
                     )
                 }}
